@@ -55,7 +55,9 @@ public partial struct PlayerSystem : ISystem
 
                 ECB.AddComponent(bulletEntity, new BulletComponent
                 {
-                    speed = 25f
+                    speed = 25f,
+                    size = 0.25f,
+                    damage = 10f
                 });
 
                 ECB.AddComponent(bulletEntity, new BulletLifeTimeComponent

@@ -44,10 +44,12 @@ public partial struct BulletSystem : ISystem
                 float3 point1 = new float3(bulletTransform.Position - bulletTransform.Forward() * 0.15f);
                 float3 point2 = new float3(bulletTransform.Position + bulletTransform.Forward() * 0.15f);
 
+                uint layerMask = LayerMaskHelper.GetLayerMaskFromTwoLayer(CollisionLayer.Wall, CollisionLayer.Enemy);
+
                 physicsWorld.CapsuleCastAll(point1, point2, bulletComponent.size / 2, float3.zero, 1f, ref hits, new CollisionFilter
                 {
                     BelongsTo = (uint)CollisionLayer.Default,
-                    CollidesWith = (uint)CollisionLayer.Wall,
+                    CollidesWith = layerMask,
                 });
 
                 if (hits.Length > 0)
