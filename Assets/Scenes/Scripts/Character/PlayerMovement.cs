@@ -8,7 +8,7 @@ public class AnimationEvent : UnityEvent<float> { }
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Références")]
+    [Header("Rï¿½fï¿½rences")]
     [SerializeField] Rigidbody rb;
     [SerializeField] Transform cameraTransform;
     public UnityEvent OnStartedRunning;
@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
     public UnityEvent OnJumped;
     public AnimationEvent OnSpeedUpdated;
 
-    [Header("Variables de déplacement du personnage")]
+    [Header("Variables de dï¿½placement du personnage")]
     public float walkingSpeed;
     public float runningSpeed;
     private float currentSpeed;
@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
     public bool canRun;
     private bool isMoving;
 
-    [Header("Rotation lissée du personnage")]
+    [Header("Rotation lissï¿½e du personnage")]
     public float turnSmoothTime;
     float turnSmoothVelocity;
 
@@ -32,8 +32,8 @@ public class PlayerMovement : MonoBehaviour
     public float gravityForce;
     public LayerMask groundMask;
     public bool canJump;
-    public float jumpForceY; // Contrôle la force verticale du saut
-    public float jumpForceForwardMultiplier; // Contrôle la force horizontale du saut
+    public float jumpForceY; // Contrï¿½le la force verticale du saut
+    public float jumpForceForwardMultiplier; // Contrï¿½le la force horizontale du saut
 
     Vector2 input;
     Vector3 moveDirection; // Ajout d'une variable pour stocker la direction du mouvement
@@ -49,70 +49,70 @@ public class PlayerMovement : MonoBehaviour
         Movement();
     }
 
-    // Méthode qui gère le mouvement
+    // Mï¿½thode qui gï¿½re le mouvement
     public void Movement()
     {
-        // On crée un vecteur direction basé sur les entrées de l'utilisateur (axes horizontal et vertical)
+        // On crï¿½e un vecteur direction basï¿½ sur les entrï¿½es de l'utilisateur (axes horizontal et vertical)
         Vector3 direction = new Vector3(input.x, 0, input.y).normalized;
 
-        // Récupère les vecteurs avant et droit de la caméra
+        // Rï¿½cupï¿½re les vecteurs avant et droit de la camï¿½ra
         Vector3 cameraForward = cameraTransform.forward;
         Vector3 cameraRight = cameraTransform.right;
 
-        // On ignore la composante Y (verticale) pour que le mouvement ne soit pas affecté par l'inclinaison de la caméra
+        // On ignore la composante Y (verticale) pour que le mouvement ne soit pas affectï¿½ par l'inclinaison de la camï¿½ra
         cameraForward.y = 0f;
         cameraRight.y = 0f;
         cameraForward.Normalize(); // Normalise le vecteur avant
         cameraRight.Normalize(); // Normalise le vecteur droit
 
-        // Calcule la direction du mouvement en fonction de la caméra et des entrées de l'utilisateur
+        // Calcule la direction du mouvement en fonction de la camï¿½ra et des entrï¿½es de l'utilisateur
         moveDirection = cameraForward * input.y + cameraRight * input.x; // On stocke cette direction dans moveDirection
 
         // On commence par la vitesse actuelle du Rigidbody pour la modifier
-        Vector3 velocity = rb.velocity;
+        Vector3 velocity = rb.linearVelocity;
 
         // Si le joueur est au sol
         if (IsGrounded())
         {
-            // Applique la gravité et réinitialise la vitesse Y pour éviter que le joueur ne monte en l'air
+            // Applique la gravitï¿½ et rï¿½initialise la vitesse Y pour ï¿½viter que le joueur ne monte en l'air
             velocity.y = -gravityForce * Time.fixedDeltaTime;
             canJump = true;
         }
         else
         {
-            // Si le joueur est en l'air, continue d'appliquer la gravité
+            // Si le joueur est en l'air, continue d'appliquer la gravitï¿½
             velocity.y += -gravityForce * Time.fixedDeltaTime;
             JumpMechanic();
         }
 
-        // Si la direction du mouvement est significative (supérieure à un certain seuil)
+        // Si la direction du mouvement est significative (supï¿½rieure ï¿½ un certain seuil)
         if (moveDirection.magnitude >= 0.1f && IsGrounded())
         {
             isMoving = true;
 
             // Calcule l'angle vers lequel le joueur doit se tourner en fonction de la direction du mouvement
             float targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
-            // Lisse la rotation du personnage pour qu'elle ne soit pas instantanée
+            // Lisse la rotation du personnage pour qu'elle ne soit pas instantanï¿½e
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-            // Applique la rotation calculée au joueur
+            // Applique la rotation calculï¿½e au joueur
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-            // Applique la vitesse de mouvement sur les axes X et Z (horizontal et avant/arrière)
+            // Applique la vitesse de mouvement sur les axes X et Z (horizontal et avant/arriï¿½re)
             velocity.x = moveDirection.x * currentSpeed * Time.fixedDeltaTime;
             velocity.z = moveDirection.z * currentSpeed * Time.fixedDeltaTime;
         }
         else isMoving = false;
 
-        // Applique la vitesse finale au Rigidbody, incluant la gravité et le mouvement
-        rb.velocity = velocity;
+        // Applique la vitesse finale au Rigidbody, incluant la gravitï¿½ et le mouvement
+        rb.linearVelocity = velocity;
 
-        speed = rb.velocity.magnitude;
+        speed = rb.linearVelocity.magnitude;
 
         // A rendre plus complexe pour le saut
         OnSpeedUpdated.Invoke(speed);
     }
 
-    // Méthode modifiée pour inclure une force directionnelle pendant le saut
+    // Mï¿½thode modifiï¿½e pour inclure une force directionnelle pendant le saut
     public void JumpMechanic()
     {
         if (canJump)
@@ -127,57 +127,57 @@ public class PlayerMovement : MonoBehaviour
             // Combine la force verticale et la force directionnelle
             rb.AddForce(jumpForce + forwardJumpForce, ForceMode.Impulse);
 
-            canJump = false; // Désactive la possibilité de sauter de nouveau jusqu'à ce que le joueur touche le sol
+            canJump = false; // Dï¿½sactive la possibilitï¿½ de sauter de nouveau jusqu'ï¿½ ce que le joueur touche le sol
             Debug.Log("Tried To Jump with forward force");
 
             OnJumped.Invoke();
         }
     }
 
-    // Méthode pour récupérer les entrées de l'utilisateur
+    // Mï¿½thode pour rï¿½cupï¿½rer les entrï¿½es de l'utilisateur
     public void GetInput()
     {
-        // On récupère les valeurs des axes d'entrée "Horizontal" (gauche/droite) et "Vertical" (avant/arrière)
+        // On rï¿½cupï¿½re les valeurs des axes d'entrï¿½e "Horizontal" (gauche/droite) et "Vertical" (avant/arriï¿½re)
         input = new Vector2(
             Input.GetAxis("Horizontal"),
             Input.GetAxis("Vertical")
         );
     }
 
-    // Méthode pour calculer la vitesse du joueur (marche ou course)
+    // Mï¿½thode pour calculer la vitesse du joueur (marche ou course)
     public void SpeedCalculation()
     {
-        // Si le bouton pour courir est pressé (par défaut "Fire3" est Shift gauche) et que le joueur peut courir
+        // Si le bouton pour courir est pressï¿½ (par dï¿½faut "Fire3" est Shift gauche) et que le joueur peut courir
         if (Input.GetButton("Fire3") && canRun && isMoving)
         {
-            // On passe à la vitesse de course
+            // On passe ï¿½ la vitesse de course
             currentSpeed = runningSpeed;
-            OnStartedRunning.Invoke(); // Appelle l'événement lorsque le joueur commence à courir
+            OnStartedRunning.Invoke(); // Appelle l'ï¿½vï¿½nement lorsque le joueur commence ï¿½ courir
         }
         else
         {
-            // Sinon, on reste à la vitesse de marche
+            // Sinon, on reste ï¿½ la vitesse de marche
             currentSpeed = walkingSpeed;
-            OnStoppedRunning.Invoke(); // Appelle l'événement lorsque le joueur arrête de courir
+            OnStoppedRunning.Invoke(); // Appelle l'ï¿½vï¿½nement lorsque le joueur arrï¿½te de courir
         }
     }
 
-    // Méthode appelée lorsque l'endurance du joueur est épuisée
+    // Mï¿½thode appelï¿½e lorsque l'endurance du joueur est ï¿½puisï¿½e
     public void OnStaminaExhausted()
     {
-        canRun = false; // Désactive la possibilité de courir
+        canRun = false; // Dï¿½sactive la possibilitï¿½ de courir
     }
 
-    // Méthode appelée lorsque l'endurance du joueur est rechargée
+    // Mï¿½thode appelï¿½e lorsque l'endurance du joueur est rechargï¿½e
     public void OnStaminaReplinished()
     {
-        canRun = true; // Réactive la possibilité de courir
+        canRun = true; // Rï¿½active la possibilitï¿½ de courir
     }
 
-    // Méthode pour savoir si le joueur est au sol
+    // Mï¿½thode pour savoir si le joueur est au sol
     bool IsGrounded()
     {
-        // Effectue un Raycast vers le bas pour détecter s'il y a un sol sous le joueur
+        // Effectue un Raycast vers le bas pour dï¿½tecter s'il y a un sol sous le joueur
         return Physics.Raycast(transform.position, Vector3.down, 2f, groundMask);
     }
 }
