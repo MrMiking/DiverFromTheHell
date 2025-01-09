@@ -1,9 +1,8 @@
 using Unity.Entities;
-
 public struct PlayerComponent : IComponentData
 {
-    public float MoveSpeed;
-    public Entity BulletPrefab;
-    public int NumOfBulletsToSpawn;
-    public float BulletSpread;
+    public float moveSpeed;
+    public Entity bulletPrefab;
+    public int numOfBulletsToSpawn;
+    public float bulletSpread;
 }
