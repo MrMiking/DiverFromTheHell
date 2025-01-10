@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5a2bd2d62d4e2c46aa4f5538d914232, type: 3}
   m_Name: SSO_Grunts
   m_EditorClassIdentifier: 
-  name: Grunts
-  visual: {fileID: 221158529823517663, guid: cde91ce6c8a2d104b82db114b4fd4e3b, type: 3}
+  enemyName: Grunts
+  visual: {fileID: 0}
   health: 100
   speed: 10
   damage: 50

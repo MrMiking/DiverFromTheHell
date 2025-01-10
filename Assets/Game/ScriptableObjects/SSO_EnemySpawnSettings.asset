@@ -14,8 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemiesToSpawn:
   - {fileID: 11400000, guid: d9edf2fb7e481e64e8ec46d8aa23205b, type: 2}
-  - {fileID: 11400000, guid: d9edf2fb7e481e64e8ec46d8aa23205b, type: 2}
-  - {fileID: 11400000, guid: d9edf2fb7e481e64e8ec46d8aa23205b, type: 2}
-  spawnInterval: 3
-  maxEnemiesPerSpawn: 3
+  spawnInterval: 0.1
+  maxEnemiesPerSpawn: 100
   spawnRadius: 5
