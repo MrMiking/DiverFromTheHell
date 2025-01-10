@@ -1,15 +1,15 @@
-using UnityEngine;
-public class NavAgentComponent : MonoBehaviour
+using Unity.Entities;
+using Unity.Mathematics;
+public struct NavAgentComponent : IComponentData
 {
-    //[Header("Settings")]
+    public Entity targetEnemy;
+    public bool pathCalculated;
+    public int currentWaypoint;
+    public float moveSpeed;
+    public float nextPathCalculateTime;
+}
 
-    //[Header("References")]
-
-    //[Space(10)]
-    // RSO
-    // RSF
-    // RSP
-
-    //[Header("Input")]
-    //[Header("Output")]
+public struct WaypointBuffer : IBufferElementData
+{
+    public float3 wayPoint;
 }

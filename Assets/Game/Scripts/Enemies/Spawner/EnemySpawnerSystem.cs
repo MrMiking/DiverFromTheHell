@@ -46,6 +46,7 @@ public partial struct EnemySpawnerSystem : ISystem
                 float2 randomOffset = _random.NextFloat2Direction() * _random.NextFloat(
                     -_enemySpawnerSettingsComponent.spawnRadius,
                     _enemySpawnerSettingsComponent.spawnRadius);
+
                 float3 spawnPosition = new float3(randomOffset.x, 1.5f, randomOffset.y);
 
                 enemyTransform.Position = spawnPosition;
