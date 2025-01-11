@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using UnityEngine.Experimental.AI;
 using Unity.Jobs;
 using UnityEngine.UIElements;
+using Unity.Physics;
 
 [BurstCompile]
 public partial struct NavAgentsystem : ISystem
@@ -17,6 +18,7 @@ public partial struct NavAgentsystem : ISystem
     private EntityQuery entityQuery;
     private NavMeshWorld navMeshWorld;
     private BufferLookup<WaypointBuffer> waypointBufferLookup;
+    private ComponentLookup<PhysicsVelocity> physicsVelocitiesLookup;
 
     private NativeArray<Entity> entities;
     private NativeArray<EntityCommandBuffer> ecbs;
@@ -32,6 +34,7 @@ public partial struct NavAgentsystem : ISystem
 
         navMeshWorld = NavMeshWorld.GetDefaultWorld();
         waypointBufferLookup = state.GetBufferLookup<WaypointBuffer>(true);
+        physicsVelocitiesLookup = state.GetComponentLookup<PhysicsVelocity>(true);
 
         navMeshQueries = new NativeList<NavMeshQuery>(Allocator.Persistent);
     }
@@ -62,6 +65,7 @@ public partial struct NavAgentsystem : ISystem
         }
 
         waypointBufferLookup.Update(ref state);
+        physicsVelocitiesLookup.Update(ref state);
 
         NativeArray<JobHandle> handles = new NativeArray<JobHandle>(entities.Length, Allocator.TempJob);
         NativeArray<NavAgentComponent> agents = entityQuery.ToComponentDataArray<NavAgentComponent>(Allocator.TempJob);
@@ -102,7 +106,8 @@ public partial struct NavAgentsystem : ISystem
                     transform = transforms[i],
                     ecb = ecbs[i],
                     deltaTime = SystemAPI.Time.DeltaTime,
-                    waypoints = waypointBufferLookup
+                    waypoints = waypointBufferLookup,
+                    physicsVelocities = physicsVelocitiesLookup
                 };
 
                 handles[i] = moveJob.Schedule();
@@ -135,15 +140,10 @@ public partial struct NavAgentsystem : ISystem
         public float deltaTime;
         public EntityCommandBuffer ecb;
         [ReadOnly] public BufferLookup<WaypointBuffer> waypoints;
+        [ReadOnly] public ComponentLookup<PhysicsVelocity> physicsVelocities;
 
         public void Execute()
         {
-            if (math.distance(transform.Position, toPosition) <= 3)
-            {
-                // Si la distance est inférieure ou égale au stopDistance, arrêter le mouvement
-                return;
-            }
-
             if (waypoints.TryGetBuffer(entity, out DynamicBuffer<WaypointBuffer> waypointBuffer) &&
                 math.distance(transform.Position, waypointBuffer[agent.currentWaypoint].wayPoint) < 0.4f)
             {
@@ -155,15 +155,22 @@ public partial struct NavAgentsystem : ISystem
                 ecb.SetComponent(entity, agent);
             }
 
-            float3 direction = waypointBuffer[agent.currentWaypoint].wayPoint - transform.Position;
-            float angle = math.PI * 0.5f - math.atan2(direction.z, direction.x);
+            float3 targetWaypoint = waypointBuffer[agent.currentWaypoint].wayPoint;
+            float3 direction = math.normalize(targetWaypoint - transform.Position);
 
-            transform.Rotation = math.slerp(
-                        transform.Rotation,
-                        quaternion.Euler(new float3(0, angle, 0)),
-                        deltaTime * 10);
+            float targetAngle = math.atan2(direction.z, direction.x);
+            quaternion targetRotation = quaternion.Euler(new float3(0, targetAngle, 0));
+            transform.Rotation = math.slerp(transform.Rotation, targetRotation, deltaTime);
 
-            transform.Position += new float3(math.normalize(direction).x, 0, math.normalize(direction).z) * deltaTime * agent.moveSpeed;
+            if (physicsVelocities.HasComponent(entity))
+            {
+                PhysicsVelocity velocity = physicsVelocities[entity];
+                velocity.Linear = direction * agent.moveSpeed;
+                velocity.Angular = float3.zero;
+
+                ecb.SetComponent(entity, velocity);
+            }
+
             ecb.SetComponent(entity, transform);
         }
     }

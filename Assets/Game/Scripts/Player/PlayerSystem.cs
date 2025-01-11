@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Collections;
+using UnityEditor;
 
 public partial struct PlayerSystem : ISystem
 {
@@ -30,16 +31,24 @@ public partial struct PlayerSystem : ISystem
 
     private void Move(ref SystemState state)
     {
+        float rotationSpeed = 10;
+
         LocalTransform playerTransform = _entityManager.GetComponentData<LocalTransform>(_playerEntity);
 
-        playerTransform.Position += new float3(
-            _inputComponent.Movement.x,0,_inputComponent.Movement.y) * _playerComponent.moveSpeed * SystemAPI.Time.DeltaTime;
+        playerTransform.Position += new float3(_inputComponent.Movement.x, 0, _inputComponent.Movement.y) 
+            * _playerComponent.moveSpeed * SystemAPI.Time.DeltaTime;
 
-        Vector2 direction = (Vector2)_inputComponent.MousePosition - (Vector2)Camera.main.WorldToScreenPoint(new Vector2(
-            playerTransform.Position.x, 
-            playerTransform.Position.z));
-        float angle = math.degrees(math.atan2(direction.x, direction.y));
-        playerTransform.Rotation = Quaternion.AngleAxis(angle, Vector3.up);
+        Plane playerPlane = new Plane(Vector3.up, playerTransform.Position);
+
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(_inputComponent.MousePosition.x, _inputComponent.MousePosition.y, 0));
+
+        if(playerPlane.Raycast(ray, out float hitDistance))
+        {
+            Vector3 targetPoint = ray.GetPoint(hitDistance);
+            Quaternion targetRotation = Quaternion.LookRotation(targetPoint - new Vector3(playerTransform.Position.x, playerTransform.Position.y, playerTransform.Position.z));
+
+            playerTransform.Rotation = Quaternion.Slerp(playerTransform.Rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
 
         _entityManager.SetComponentData(_playerEntity, playerTransform);
     }

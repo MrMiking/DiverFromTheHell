@@ -4,37 +4,52 @@ using System.Collections.Generic;
 
 public class EnemySpawnerAuthoring : MonoBehaviour
 {
-    public float spawnCooldown = 1;
-    public float spawnRadius = 5;
-    public List<SSO_EnemyData> enemies;
+    [SerializeField] private SSO_SpawnerData spawnerData;
 
     public class EnemySpawnerBaker : Baker<EnemySpawnerAuthoring>
     {
         public override void Bake(EnemySpawnerAuthoring authoring)
         {
-            Entity entity = GetEntity(TransformUsageFlags.Dynamic);
+            Entity waveEntity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent(entity, new EnemySpawnerComponent
+            AddComponent(waveEntity, new WaveSpawnerComponent
             {
-                spawnCooldown = authoring.spawnCooldown,
-                spawnRadius = authoring.spawnRadius,
+                wavesDelay = authoring.spawnerData.wavesDelay
             });
 
-            List<EnemyData> enemyData = new List<EnemyData>();
+            List<WaveData> wavesData = new List<WaveData>();
 
-            foreach (SSO_EnemyData ssoEnemyData in authoring.enemies)
+            foreach (SSO_WaveData ssoWaveData in authoring.spawnerData.waves)
             {
-                enemyData.Add(new EnemyData
+                var waveData = new WaveData
                 {
-                    level = ssoEnemyData.level,
-                    prefab = GetEntity(ssoEnemyData.prefab, TransformUsageFlags.None),
-                    health = ssoEnemyData.health,
-                    damage = ssoEnemyData.damage,
-                    moveSpeed = ssoEnemyData.moveSpeed,
-                });
+                    spawnInterval = ssoWaveData.spawnInterval,
+                    maxEnemiesPerSpawn = ssoWaveData.maxEnemiesPerSpawn,
+                    spawnRadius = ssoWaveData.spawnRadius,
+                    enemiesToSpawn = new List<EnemyDataContainer>()
+                };
+
+                foreach(var enemy in ssoWaveData.enemiesToSpawn)
+                {
+                    Entity enemyEntity = GetEntity(enemy.enemyData.visual, TransformUsageFlags.Dynamic);
+
+                    waveData.enemiesToSpawn.Add(new EnemyDataContainer
+                    {
+                        enemy = new EnemyData
+                        {
+                            visual = enemyEntity,
+                            health = enemy.enemyData.health,
+                            damage = enemy.enemyData.damage,
+                            moveSpeed = enemy.enemyData.moveSpeed,
+                        },
+                        quantity = enemy.quantity
+                    });
+                }
+
+                wavesData.Add(waveData);
             }
 
-            AddComponentObject(entity, new EnemyDataContainer { enemies = enemyData });
+            AddComponentObject(waveEntity, new WaveDataContainer { waves = wavesData });
         }
     }
 }

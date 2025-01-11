@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class EnemyDataContainer : IComponentData
 {
-    public List<EnemyData> enemies;
+    public EnemyData enemy;
+    public int quantity;
 }
 
 public struct EnemyData
 {
-    public int level;
-    public Entity prefab;
+    public Entity visual;
     public float health;
     public float damage;
     public float moveSpeed;

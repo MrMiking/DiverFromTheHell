@@ -1,4 +1,6 @@
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Physics;
 using UnityEngine;
 public class NavAgentAuthoring : MonoBehaviour
 {
@@ -8,14 +10,14 @@ public class NavAgentAuthoring : MonoBehaviour
     {
         public override void Bake(NavAgentAuthoring authoring)
         {
-            Entity authoringEntity = GetEntity(TransformUsageFlags.Dynamic);
+            Entity entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent(authoringEntity, new NavAgentComponent
+            AddComponent(entity, new NavAgentComponent
             {
                 moveSpeed = authoring.moveSpeed
             });
 
-            AddBuffer<WaypointBuffer>(authoringEntity);
+            AddBuffer<WaypointBuffer>(entity);
         }
     }
 }

@@ -1,80 +1,68 @@
-using System.Collections.Generic;
-using System.Numerics;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-public partial class EnemySpawnerSystem : SystemBase
+public partial class WavesSpawnerSystem : SystemBase
 {
-    private EnemySpawnerComponent enemySpawnerComponent;
-    private EnemyDataContainer enemyDataContainerComponent;
-    private Entity enemySpawnerEntity;
-
-    private float nextSpawnTime;
-
-    private Random random;
+    private Random _random;
 
     protected override void OnCreate()
     {
-        random = Random.CreateFromIndex((uint)enemySpawnerComponent.GetHashCode());
+        _random = Random.CreateFromIndex((uint)UnityEngine.Time.frameCount);
     }
 
     protected override void OnUpdate()
     {
-        if(!SystemAPI.TryGetSingletonEntity<EnemySpawnerComponent>(out enemySpawnerEntity))
-        {
-            return;
-        }
+        EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        enemySpawnerComponent = EntityManager.GetComponentData<EnemySpawnerComponent>(enemySpawnerEntity);
-        enemyDataContainerComponent = EntityManager.GetComponentObject<EnemyDataContainer>(enemySpawnerEntity);
-
-        if(SystemAPI.Time.ElapsedTime > nextSpawnTime)
+        Entities.WithStructuralChanges().ForEach((Entity entity, ref WaveSpawnerComponent spawner, in WaveDataContainer waveDataContainer) =>
         {
-            SpawnEnemies();
-        }
+            if (spawner.currentWaveIndex >= waveDataContainer.waves.Count) return;
+
+            spawner.currentTimeBeforeNextSpawn -= SystemAPI.Time.DeltaTime;
+
+            WaveData currentWave = waveDataContainer.waves[spawner.currentWaveIndex];
+
+            if (spawner.currentTimeBeforeNextSpawn <= 0)
+            {
+                spawner.currentWaveIndex += 1;
+                spawner.currentTimeBeforeNextSpawn = spawner.wavesDelay;
+
+                SpawnEnemies(ecb, currentWave);
+                return;
+            }
+        }).Run();
+
+        ecb.Playback(EntityManager);
+        ecb.Dispose();
     }
 
-    private void SpawnEnemies()
+    private void SpawnEnemies(EntityCommandBuffer ecb, WaveData wave)
     {
-        float enemyScale = 1; //Temp
-
-        int level = 2;
-        List<EnemyData> availableEnemies = new List<EnemyData>();
-
-        foreach (EnemyData enemyData in enemyDataContainerComponent.enemies)
+        foreach(EnemyDataContainer enemyData in wave.enemiesToSpawn)
         {
-            if(enemyData.level <= level)
+            int spawnCount = math.min(wave.maxEnemiesPerSpawn, enemyData.quantity);
+
+            for(int i = 0; i < spawnCount; i++)
             {
-                availableEnemies.Add(enemyData);
+                Entity enemyEntity = ecb.Instantiate(enemyData.enemy.visual);
+                Entity spawnerEntity = SystemAPI.GetSingletonEntity<WaveSpawnerComponent>();
+
+                float3 spawnerPosition = EntityManager.GetComponentData<LocalTransform>(spawnerEntity).Position;
+                float3 spawnPosition = spawnerPosition + new float3(
+                    _random.NextFloat(-wave.spawnRadius, wave.spawnRadius), 
+                    0,
+                    _random.NextFloat(-wave.spawnRadius, wave.spawnRadius));
+
+                ecb.SetComponent(enemyEntity, LocalTransform.FromPosition(spawnPosition));
+
+                ecb.AddComponent(enemyEntity, new Health
+                {
+                    health = enemyData.enemy.health,
+                    currentHealth = enemyData.enemy.health
+                });
             }
         }
-
-        int index = random.NextInt(availableEnemies.Count);
-
-        LocalTransform spawnerTransform = EntityManager.GetComponentData<LocalTransform>(enemySpawnerEntity);
-
-        Entity newEnemy = EntityManager.Instantiate(availableEnemies[index].prefab);
-        EntityManager.SetComponentData(newEnemy, new LocalTransform
-        {
-            Position = GetRandomSpawnPosition() + spawnerTransform.Position,
-            Rotation = quaternion.identity,
-            Scale = enemyScale
-        });
-
-        EntityManager.AddComponentData(newEnemy, new EnemyComponent
-        {
-            currentHealth = availableEnemies[index].health,
-        });
-
-        nextSpawnTime = (float)SystemAPI.Time.ElapsedTime + enemySpawnerComponent.spawnCooldown;
-    }
-
-    private float3 GetRandomSpawnPosition()
-    {
-        float2 spawnPosition = random.NextFloat2Direction() * random.NextFloat(-enemySpawnerComponent.spawnRadius, enemySpawnerComponent.spawnRadius);
-
-        return new float3(spawnPosition.x, 0, spawnPosition.y);
     }
 }

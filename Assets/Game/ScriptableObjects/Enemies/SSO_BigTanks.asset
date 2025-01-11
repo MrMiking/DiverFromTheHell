@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5a2bd2d62d4e2c46aa4f5538d914232, type: 3}
   m_Name: SSO_BigTanks
   m_EditorClassIdentifier: 
-  level: 0
-  prefab: {fileID: 6275890356694925586, guid: cde91ce6c8a2d104b82db114b4fd4e3b, type: 3}
+  enemyName: BigTank
+  visual: {fileID: 8222045698250651534, guid: cde91ce6c8a2d104b82db114b4fd4e3b, type: 3}
   health: 500
   damage: 10
   moveSpeed: 2

@@ -10,10 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 025af69ad03bd0c4b9b2b4a6b1062d64, type: 3}
-  m_Name: SSO_EnemySpawnSettings
+  m_Name: SSO_Wave_1
   m_EditorClassIdentifier: 
   enemiesToSpawn:
-  - {fileID: 11400000, guid: d9edf2fb7e481e64e8ec46d8aa23205b, type: 2}
+  - enemyData: {fileID: 11400000, guid: 34a24834e4bdc8048b0950771163adfc, type: 2}
+    quantity: 100
+  - enemyData: {fileID: 11400000, guid: d9edf2fb7e481e64e8ec46d8aa23205b, type: 2}
+    quantity: 100
   spawnInterval: 1
-  maxEnemiesPerSpawn: 0
+  maxEnemiesPerSpawn: 100
   spawnRadius: 5
