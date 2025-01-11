@@ -12,7 +12,7 @@ public class PlayerAuthoring : MonoBehaviour
     {
         public override void Bake(PlayerAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            Entity entity = GetEntity(TransformUsageFlags.Dynamic);
 
             AddComponent(entity, new PlayerComponent
             {

@@ -54,6 +54,22 @@ public partial struct BulletSystem : ISystem
 
                 if (hits.Length > 0)
                 {
+                    for(int i = 0; i < hits.Length; i++)
+                    {
+                        Entity hitsEntity = hits[i].Entity;
+                        if (entityManager.HasComponent<EnemyComponent>(hitsEntity))
+                        {
+                            EnemyComponent enemyComponent = entityManager.GetComponentData<EnemyComponent>(hitsEntity);
+                            enemyComponent.currentHealth -= bulletComponent.damage;
+                            entityManager.SetComponentData(hitsEntity, enemyComponent);
+
+                            if(enemyComponent.currentHealth <= 0f)
+                            {
+                                entityManager.DestroyEntity(hitsEntity);
+                            }
+                        }
+                    }
+
                     entityManager.DestroyEntity(entity);
                 }
 

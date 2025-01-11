@@ -17,6 +17,7 @@ public partial struct PlayerSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         _entityManager = state.EntityManager;
+
         _playerEntity = SystemAPI.GetSingletonEntity<PlayerComponent>();
         _inputEntity = SystemAPI.GetSingletonEntity<InputComponent>();
 
