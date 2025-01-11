@@ -58,7 +58,7 @@ public partial class EnemySpawnerSystem : SystemBase
         Entity newEnemy = EntityManager.Instantiate(availableEnemies[index].prefab);
         EntityManager.SetComponentData(newEnemy, new LocalTransform
         {
-            Position = GetRandomSpawnPosition(enemyScale) + spawnerTransform.Position,
+            Position = GetRandomSpawnPosition() + spawnerTransform.Position,
             Rotation = quaternion.identity,
             Scale = enemyScale
         });
@@ -71,10 +71,10 @@ public partial class EnemySpawnerSystem : SystemBase
         nextSpawnTime = (float)SystemAPI.Time.ElapsedTime + enemySpawnerComponent.spawnCooldown;
     }
 
-    private float3 GetRandomSpawnPosition(float enemyScale)
+    private float3 GetRandomSpawnPosition()
     {
         float2 spawnPosition = random.NextFloat2Direction() * random.NextFloat(-enemySpawnerComponent.spawnRadius, enemySpawnerComponent.spawnRadius);
 
-        return new float3(spawnPosition.x, enemyScale, spawnPosition.y);
+        return new float3(spawnPosition.x, 0, spawnPosition.y);
     }
 }

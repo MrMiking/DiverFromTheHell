@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Experimental.AI;
 using Unity.Jobs;
+using UnityEngine.UIElements;
 
 [BurstCompile]
 public partial struct NavAgentsystem : ISystem
@@ -97,6 +98,7 @@ public partial struct NavAgentsystem : ISystem
                 {
                     entity = entities[i],
                     agent = agents[i],
+                    toPosition = entityManager.GetComponentData<LocalTransform>(playerEntity).Position,
                     transform = transforms[i],
                     ecb = ecbs[i],
                     deltaTime = SystemAPI.Time.DeltaTime,
@@ -128,6 +130,7 @@ public partial struct NavAgentsystem : ISystem
     {
         public NavAgentComponent agent;
         public LocalTransform transform;
+        public float3 toPosition;
         public Entity entity;
         public float deltaTime;
         public EntityCommandBuffer ecb;
@@ -135,7 +138,13 @@ public partial struct NavAgentsystem : ISystem
 
         public void Execute()
         {
-            if(waypoints.TryGetBuffer(entity, out DynamicBuffer<WaypointBuffer> waypointBuffer) &&
+            if (math.distance(transform.Position, toPosition) <= 3)
+            {
+                // Si la distance est inférieure ou égale au stopDistance, arrêter le mouvement
+                return;
+            }
+
+            if (waypoints.TryGetBuffer(entity, out DynamicBuffer<WaypointBuffer> waypointBuffer) &&
                 math.distance(transform.Position, waypointBuffer[agent.currentWaypoint].wayPoint) < 0.4f)
             {
                 if(agent.currentWaypoint + 1 < waypointBuffer.Length)
@@ -154,7 +163,7 @@ public partial struct NavAgentsystem : ISystem
                         quaternion.Euler(new float3(0, angle, 0)),
                         deltaTime * 10);
 
-            transform.Position += math.normalize(direction) * deltaTime * agent.moveSpeed;
+            transform.Position += new float3(math.normalize(direction).x, 0, math.normalize(direction).z) * deltaTime * agent.moveSpeed;
             ecb.SetComponent(entity, transform);
         }
     }
