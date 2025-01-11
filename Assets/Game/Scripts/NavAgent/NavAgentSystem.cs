@@ -6,7 +6,6 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Experimental.AI;
 using Unity.Jobs;
-using Unity.VisualScripting;
 
 [BurstCompile]
 public partial struct NavAgentsystem : ISystem
