@@ -5,8 +5,6 @@ public class PlayerAuthoring : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public GameObject bulletPrefab;
-    public int numOfBulletsToSpawn = 50;
-    [Range(0f, 10f)] public float bulletSpread;
 
     private class PlayerBaker : Baker<PlayerAuthoring>
     {
@@ -18,9 +16,14 @@ public class PlayerAuthoring : MonoBehaviour
             {
                 moveSpeed = authoring.moveSpeed,
                 bulletPrefab = GetEntity(authoring.bulletPrefab, TransformUsageFlags.None),
-                numOfBulletsToSpawn = authoring.numOfBulletsToSpawn,
-                bulletSpread = authoring.bulletSpread
             });
+
+            AddComponent(entity, new Health { 
+                health = 1000, 
+                currentHealth = 1000 
+            });
+
+            AddComponent(entity, new PlayerTag { });
         }
     }
 }

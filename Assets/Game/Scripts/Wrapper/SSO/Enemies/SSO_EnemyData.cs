@@ -8,4 +8,5 @@ public class SSO_EnemyData : ScriptableObject
     public float health;
     public float damage;
     public float moveSpeed;
+    public float attackSpeed;
 }

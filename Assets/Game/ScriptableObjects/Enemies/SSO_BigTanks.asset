@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: SSO_BigTanks
   m_EditorClassIdentifier: 
   enemyName: BigTank
-  visual: {fileID: 8222045698250651534, guid: cde91ce6c8a2d104b82db114b4fd4e3b, type: 3}
+  visual: {fileID: 8222045698250651534, guid: 8d1ff3b469ea8c04ca05446fa859c158, type: 3}
   health: 500
   damage: 10
-  moveSpeed: 2
+  moveSpeed: 1
+  attackSpeed: 0.5

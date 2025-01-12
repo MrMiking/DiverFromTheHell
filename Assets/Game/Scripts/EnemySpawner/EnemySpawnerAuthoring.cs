@@ -41,6 +41,8 @@ public class EnemySpawnerAuthoring : MonoBehaviour
                             health = enemy.enemyData.health,
                             damage = enemy.enemyData.damage,
                             moveSpeed = enemy.enemyData.moveSpeed,
+                            cooldown = enemy.enemyData.attackSpeed,
+                            
                         },
                         quantity = enemy.quantity
                     });

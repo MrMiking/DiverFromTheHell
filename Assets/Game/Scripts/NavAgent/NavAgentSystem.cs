@@ -19,6 +19,7 @@ public partial struct NavAgentsystem : ISystem
     private NavMeshWorld navMeshWorld;
     private BufferLookup<WaypointBuffer> waypointBufferLookup;
     private ComponentLookup<PhysicsVelocity> physicsVelocitiesLookup;
+    private ComponentLookup<MoveSpeed> moveSpeedLookup;
 
     private NativeArray<Entity> entities;
     private NativeArray<EntityCommandBuffer> ecbs;
@@ -35,6 +36,7 @@ public partial struct NavAgentsystem : ISystem
         navMeshWorld = NavMeshWorld.GetDefaultWorld();
         waypointBufferLookup = state.GetBufferLookup<WaypointBuffer>(true);
         physicsVelocitiesLookup = state.GetComponentLookup<PhysicsVelocity>(true);
+        moveSpeedLookup = state.GetComponentLookup<MoveSpeed>(true);
 
         navMeshQueries = new NativeList<NavMeshQuery>(Allocator.Persistent);
     }
@@ -66,6 +68,7 @@ public partial struct NavAgentsystem : ISystem
 
         waypointBufferLookup.Update(ref state);
         physicsVelocitiesLookup.Update(ref state);
+        moveSpeedLookup.Update(ref state);
 
         NativeArray<JobHandle> handles = new NativeArray<JobHandle>(entities.Length, Allocator.TempJob);
         NativeArray<NavAgentComponent> agents = entityQuery.ToComponentDataArray<NavAgentComponent>(Allocator.TempJob);
@@ -107,7 +110,8 @@ public partial struct NavAgentsystem : ISystem
                     ecb = ecbs[i],
                     deltaTime = SystemAPI.Time.DeltaTime,
                     waypoints = waypointBufferLookup,
-                    physicsVelocities = physicsVelocitiesLookup
+                    physicsVelocities = physicsVelocitiesLookup,
+                    moveSpeed = moveSpeedLookup
                 };
 
                 handles[i] = moveJob.Schedule();
@@ -129,7 +133,6 @@ public partial struct NavAgentsystem : ISystem
         ecbs.Dispose();
     }
 
-
     [BurstCompile]
     private struct MoveJob : IJob
     {
@@ -141,6 +144,7 @@ public partial struct NavAgentsystem : ISystem
         public EntityCommandBuffer ecb;
         [ReadOnly] public BufferLookup<WaypointBuffer> waypoints;
         [ReadOnly] public ComponentLookup<PhysicsVelocity> physicsVelocities;
+        [ReadOnly] public ComponentLookup<MoveSpeed> moveSpeed;
 
         public void Execute()
         {
@@ -165,7 +169,7 @@ public partial struct NavAgentsystem : ISystem
             if (physicsVelocities.HasComponent(entity))
             {
                 PhysicsVelocity velocity = physicsVelocities[entity];
-                velocity.Linear = direction * agent.moveSpeed;
+                velocity.Linear = direction * moveSpeed[entity].Value;
                 velocity.Angular = float3.zero;
 
                 ecb.SetComponent(entity, velocity);

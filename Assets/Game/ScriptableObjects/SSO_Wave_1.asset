@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: SSO_Wave_1
   m_EditorClassIdentifier: 
   enemiesToSpawn:
-  - enemyData: {fileID: 11400000, guid: 34a24834e4bdc8048b0950771163adfc, type: 2}
-    quantity: 100
   - enemyData: {fileID: 11400000, guid: d9edf2fb7e481e64e8ec46d8aa23205b, type: 2}
-    quantity: 100
+    quantity: 5
+  - enemyData: {fileID: 11400000, guid: 34a24834e4bdc8048b0950771163adfc, type: 2}
+    quantity: 10
   spawnInterval: 1
-  maxEnemiesPerSpawn: 100
+  maxEnemiesPerSpawn: 10
   spawnRadius: 5

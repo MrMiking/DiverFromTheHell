@@ -57,37 +57,33 @@ public partial struct PlayerSystem : ISystem
     {
         if (_inputComponent.Shoot)
         {
-            for (int i = 0; i < _playerComponent.numOfBulletsToSpawn; i++)
+            EntityCommandBuffer ECB = new EntityCommandBuffer(Allocator.Temp);
+
+            Entity bulletEntity = _entityManager.Instantiate(_playerComponent.bulletPrefab);
+
+            ECB.AddComponent(bulletEntity, new BulletComponent
             {
-                EntityCommandBuffer ECB = new EntityCommandBuffer(Allocator.Temp);
+                speed = 25f,
+                size = 0.25f,
+                damage = 10f
+            });
 
-                Entity bulletEntity = _entityManager.Instantiate(_playerComponent.bulletPrefab);
+            ECB.AddComponent(bulletEntity, new BulletLifeTimeComponent
+            {
+                remainingLifeTime = 1.5f
+            });
 
-                ECB.AddComponent(bulletEntity, new BulletComponent
-                {
-                    speed = 25f,
-                    size = 0.25f,
-                    damage = 10f
-                });
+            LocalTransform bulletTransform = _entityManager.GetComponentData<LocalTransform>(bulletEntity);
+            LocalTransform playerTransform = _entityManager.GetComponentData<LocalTransform>(_playerEntity);
 
-                ECB.AddComponent(bulletEntity, new BulletLifeTimeComponent
-                {
-                    remainingLifeTime = 1.5f
-                });
+            bulletTransform.Rotation = playerTransform.Rotation;
 
-                LocalTransform bulletTransform = _entityManager.GetComponentData<LocalTransform>(bulletEntity);
-                LocalTransform playerTransform = _entityManager.GetComponentData<LocalTransform>(_playerEntity);
+            bulletTransform.Position = playerTransform.Position + playerTransform.Forward();
 
-                bulletTransform.Rotation = playerTransform.Rotation;
+            ECB.SetComponent(bulletEntity, bulletTransform);
+            ECB.Playback(_entityManager);
 
-                float randomOffset = UnityEngine.Random.Range(-_playerComponent.bulletSpread, _playerComponent.bulletSpread);
-                bulletTransform.Position = playerTransform.Position + playerTransform.Forward() * 1.65f + (bulletTransform.Right() * randomOffset);
-
-                ECB.SetComponent(bulletEntity, bulletTransform);
-                ECB.Playback(_entityManager);
-
-                ECB.Dispose();
-            }
+            ECB.Dispose();
         }
     }
 }

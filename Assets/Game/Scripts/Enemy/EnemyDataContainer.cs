@@ -14,4 +14,5 @@ public struct EnemyData
     public float health;
     public float damage;
     public float moveSpeed;
+    public float cooldown;
 }

@@ -2,14 +2,15 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
 public partial class WavesSpawnerSystem : SystemBase
 {
-    private Random _random;
+    private Unity.Mathematics.Random _random;
 
     protected override void OnCreate()
     {
-        _random = Random.CreateFromIndex((uint)UnityEngine.Time.frameCount);
+        _random = Unity.Mathematics.Random.CreateFromIndex((uint)UnityEngine.Time.frameCount);
     }
 
     protected override void OnUpdate()
@@ -42,9 +43,7 @@ public partial class WavesSpawnerSystem : SystemBase
     {
         foreach(EnemyDataContainer enemyData in wave.enemiesToSpawn)
         {
-            int spawnCount = math.min(wave.maxEnemiesPerSpawn, enemyData.quantity);
-
-            for(int i = 0; i < spawnCount; i++)
+            for(int i = 0; i < enemyData.quantity; i++)
             {
                 Entity enemyEntity = ecb.Instantiate(enemyData.enemy.visual);
                 Entity spawnerEntity = SystemAPI.GetSingletonEntity<WaveSpawnerComponent>();
@@ -62,6 +61,21 @@ public partial class WavesSpawnerSystem : SystemBase
                     health = enemyData.enemy.health,
                     currentHealth = enemyData.enemy.health
                 });
+
+                ecb.AddComponent(enemyEntity, new MoveSpeed
+                {
+                    Value = enemyData.enemy.moveSpeed
+                });
+
+                ecb.AddComponent(enemyEntity, new Attack
+                {
+                    attackRange = 5,
+                    cooldown = enemyData.enemy.cooldown,
+                    targetType = TargetType.Player,
+                    damage = enemyData.enemy.damage
+                });
+
+                ecb.AddComponent(enemyEntity, new EnemyTag { });
             }
         }
     }

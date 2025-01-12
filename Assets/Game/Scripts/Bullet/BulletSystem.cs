@@ -38,7 +38,6 @@ public partial struct BulletSystem : ISystem
 
                 entityManager.SetComponentData(entity, bulletLifeTimeComponent);
 
-                // Physics
                 NativeList<ColliderCastHit> hits = new NativeList<ColliderCastHit>(Allocator.Temp);
 
                 float3 point1 = new float3(bulletTransform.Position - bulletTransform.Forward() * 0.15f);
@@ -57,16 +56,11 @@ public partial struct BulletSystem : ISystem
                     for(int i = 0; i < hits.Length; i++)
                     {
                         Entity hitsEntity = hits[i].Entity;
-                        if (entityManager.HasComponent<EnemyComponent>(hitsEntity))
+                        if (entityManager.HasComponent<Health>(hitsEntity))
                         {
-                            EnemyComponent enemyComponent = entityManager.GetComponentData<EnemyComponent>(hitsEntity);
+                            Health enemyComponent = entityManager.GetComponentData<Health>(hitsEntity);
                             enemyComponent.currentHealth -= bulletComponent.damage;
                             entityManager.SetComponentData(hitsEntity, enemyComponent);
-
-                            if(enemyComponent.currentHealth <= 0f)
-                            {
-                                entityManager.DestroyEntity(hitsEntity);
-                            }
                         }
                     }
 

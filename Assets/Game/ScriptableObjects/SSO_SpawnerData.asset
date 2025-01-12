@@ -14,6 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waves:
   - {fileID: 11400000, guid: 06ed718d7e981934babfeaeaf3b9995a, type: 2}
-  - {fileID: 11400000, guid: 06ed718d7e981934babfeaeaf3b9995a, type: 2}
-  - {fileID: 11400000, guid: 06ed718d7e981934babfeaeaf3b9995a, type: 2}
   wavesDelay: 10
